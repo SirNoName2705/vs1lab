@@ -22,10 +22,10 @@
             <fieldset>
                 <legend>Add a new GeoTag</legend>
                 <label for="latitude">Latitude:</label>
-                <input type="text" id="latitude" name="latitude" value="49.01379" readonly required>
+                <input type="text" id="latitude" name="latitude"  readonly required placeholder="Wird ermittelt...">
 
                 <label for="longitude">Longitude:</label>
-                <input type="text" id="longitude" name="longitude" value="8.404435" readonly required>
+                <input type="text" id="longitude" name="longitude" readonly required placeholder="Wird ermittelt...">
 
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required placeholder="e.g. Castle" maxlength="10">
@@ -46,8 +46,8 @@
                 <label for="searchterm">Search term:</label>
                 <input type="text" id="searchterm" name="searchterm" placeholder="e.g. Castle or #sight">
 
-                <input type="hidden" id="hidden_latitude" name="latitude" value="49.01379">
-                <input type="hidden" id="hidden_longitude" name="longitude" value="8.404435">
+                <input type="hidden" id="hidden_latitude" name="latitude" value="">
+                <input type="hidden" id="hidden_longitude" name="longitude" value="">
 
                 <button type="submit">Search</button>
             </fieldset>
