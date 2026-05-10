@@ -152,6 +152,14 @@ function updateLocation() {
         document.getElementById('hidden_latitude').value = lat;
         document.getElementById('hidden_longitude').value = lon;
 
+        const mapContainer = document.getElementById('map');
+        mapContainer.innerHTML = '';
+        const mapManager = new MapManager();
+
+        mapManager.initMap(lat, lon);
+        mapManager.updateMarkers(lat, lon);
+
+
 
     });
 
