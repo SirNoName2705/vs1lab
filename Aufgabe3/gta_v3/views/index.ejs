@@ -1,5 +1,82 @@
-<!-- TODO: HTML AUS AUFGABE2 HIERHER KOPIEREN UND DIE BEISPIEL-EINTRÄGE DER DISCOVERY-LISTE MIT DEN FOLGENDEN ZEILEN ERSETZEN -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoTagApp</title>
+    <link rel="stylesheet" href="./stylesheets/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<header class="header">
+    <img src="./images/location.png" class="header__image" alt="an image of a map and location" height="30">
+    <h1 class="header__title">GeoTagApp</h1>
+    <nav class="header__navigation">
+        <a href="#">About</a> | <a href="#">Help</a> | <a href="/">Home</a>
+    </nav>
+</header>
 
-<% if (taglist !== undefined) taglist.forEach(function(gtag) { %>
-    <li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
-<% }); %>
+<main class="main row">
+    <section class="main__tagging tagging col-4">
+        <h2>Tagging</h2>
+        <form id="tag-form" action="/tagging" method="post">
+            <fieldset>
+                <legend>Add a new GeoTag</legend>
+                <label for="latitude">Latitude:</label>
+                <input type="text" id="latitude" name="latitude"  readonly required placeholder="Wird ermittelt...">
+
+                <label for="longitude">Longitude:</label>
+                <input type="text" id="longitude" name="longitude" readonly required placeholder="Wird ermittelt...">
+
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required placeholder="e.g. Castle" maxlength="10">
+
+                <label for="hashtag">Hashtag:</label>
+                <input type="text" id="hashtag" name="hashtag" placeholder="#sight" pattern="#[A-Za-z0-9]{1,9}" title="Starts with #, max 10 chars">
+
+                <button type="submit">Add Tag</button>
+            </fieldset>
+        </form>
+    </section>
+
+    <section class="main__discovery discovery col-8">
+        <h2 class="discovery__title">Discovery</h2>
+        <form class="discovery__search" id="discoveryFilterForm" action="/discovery" method="post">
+            <fieldset>
+                <legend>Search</legend>
+                <label for="searchterm">Search term:</label>
+                <input type="text" id="searchterm" name="searchterm" placeholder="e.g. Castle or #sight">
+
+                <input type="hidden" id="hidden_latitude" name="latitude" value="">
+                <input type="hidden" id="hidden_longitude" name="longitude" value="">
+
+                <button type="submit">Search</button>
+            </fieldset>
+        </form>
+
+        <div class="discovery__wrapper row">
+            <div class="discovery__taglist col-5">
+                <ul class="discovery__results" id="discoveryResults">
+                    <% if (taglist !== undefined) taglist.forEach(function(gtag) { %>
+                        <li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
+                    <% }); %>
+                </ul>
+            </div>
+
+            <div id="map" class="discovery__map col-7">
+                <img src="./images/mapview.jpg" alt="a map with locations" id="mapView" />
+                <span>Result map</span>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <span>(c) 2021/22 HKA_IWI_VSYS</span>
+</footer>
+
+<script src="./javascripts/geotagging.js"></script>
+
+</body>
+</html>
