@@ -29,7 +29,7 @@ Nach der Aktualisierung kann die zweite Aufgabe vorbereitet werden.
 2. Kopieren sie den Inhalt `Aufgabe2/gta_v2/public/index.html` in die EJS-Datei und **ersetzen** sie die **Beispieleinträge der Discovery-Liste** mit den folgenden Zeilen:
 
 ```HTML
-    <% if (taglist !== undefined) taglist.forEach(function(gtag) { %>
+    <% if (taglist !==  undefined) taglist.forEach(function(gtag) { %>
         <li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
     <% }); %>
 ```
@@ -123,31 +123,31 @@ Zur Übersicht folgen noch mal alle Anforderungen in kompakter Form als Checklis
 
 ### 1. Teilaufgabe: Server-Implementierung
 
-- [ ] **Skripte** für Backend Funktionen fertigstellen
-  - [ ] **Klasse für GeoTag Objekte** erstellen (`./model/geotag.js`)
-  - [ ] **Klasse zur GeoTag Speicherung** erstellen (`./model/geotag-store.js`)
-    - [ ] Privaten Array nutzen
-    - [ ] Methoden `addGeoTag`, `removeGeoTag`, `getNearbyGeoTags`, `searchNearbyGeoTags` realisieren
+- [x] **Skripte** für Backend Funktionen fertigstellen
+  - [x] **Klasse für GeoTag Objekte** erstellen (`./model/geotag.js`)
+  - [X] **Klasse zur GeoTag Speicherung** erstellen (`./model/geotag-store.js`)
+    - [X] Privaten Array nutzen
+    - [X] Methoden `addGeoTag`, `removeGeoTag`, `getNearbyGeoTags`, `searchNearbyGeoTags` realisieren
   - [ ] **Beispieldaten für GeoTag Objekte** einlesen (`./model/geotag-examples.js`)
 
-- [ ] **Server Konfiguration und Routen** fertigstellen
-  - [ ] **Statische Dateien** bereitstellen (`./app.js`)
-  - [ ] Route `/tagging` zur **GeoTags Speicherung** erstellen. (`./routes/index.js`)
-  - [ ] Route `/discovery` zur **GeoTag Abfrage** erstellen. (`./routes/index.js`)
+- [x] **Server Konfiguration und Routen** fertigstellen
+  - [x] **Statische Dateien** bereitstellen (`./app.js`)
+  - [x] Route `/tagging` zur **GeoTags Speicherung** erstellen. (`./routes/index.js`)
+  - [x] Route `/discovery` zur **GeoTag Abfrage** erstellen. (`./routes/index.js`)
 
-- [ ] Server **Template** erweitern (`./views/index.ejs`)
-  - [ ] Koordinaten in Formulare eintragen
+- [x] Server **Template** erweitern (`./views/index.ejs`)
+  - [x] Koordinaten in Formulare eintragen
 
 ### 2. Teilaufgabe: Client-Anpassung
 
-- [ ] Teil A: `MapManager` und `LocationHelper` **Klassen in eigene Skripte auslagern** (`./public/javascripts/geotagging.js`)
+- [x] Teil A: `MapManager` und `LocationHelper` **Klassen in eigene Skripte auslagern** (`./public/javascripts/geotagging.js`)
 - [ ] Teil B:  `updateLocation`-Funktion **optimieren**
   - [ ] Auslesen von Formularfeldern mit Koordinaten
   - [ ] Bedingte Ausführung von `LocationHelper.findLocation()`
 
 ### 3. Teilaufgabe: Karten-Erweiterung
 
-- [ ] EJS-Template mit `data-*`-Attribut erweitern
+- [x] EJS-Template mit `data-*`-Attribut erweitern
   - [ ] Im `#map`-Element ein `data-tags`-Attribut erstellen und **Array mit GeoTag Objekten als JSON-String** einfügen
 - [ ] Aufruf von `updateMarkers` aus `updateLocation` erweitern
   - [ ] Array mit GeoTag Objekten übergeben und **Map Marker anzeigen**

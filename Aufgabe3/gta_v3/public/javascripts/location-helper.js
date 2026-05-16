@@ -8,6 +8,7 @@ class LocationHelper {
     // Location values for latitude and longitude are private properties to protect them from changes.
     #latitude = '';
 
+
     /**
      * Getter method allows read access to privat location property.
      */
@@ -29,6 +30,7 @@ class LocationHelper {
     constructor(latitude, longitude) {
         this.#latitude = (parseFloat(latitude)).toFixed(5);
         this.#longitude = (parseFloat(longitude)).toFixed(5);
+        console.log("location-helper.js");
     }
 
     /**
@@ -39,7 +41,7 @@ class LocationHelper {
      */
     static findLocation(callback) {
         const geoLocationApi = navigator.geolocation
-
+        console.log("location-helper.js/findlocation()");
         if (!geoLocationApi) {
             throw new Error("The GeoLocation API is unavailable.");
         }

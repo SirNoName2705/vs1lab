@@ -16,8 +16,7 @@ const router = express.Router();
 /**
  * The module "geotag" exports a class GeoTagStore. 
  * It represents geotags.
- * 
- * TODO: implement the module in the file "../models/geotag.js"
+ *
  */
 // eslint-disable-next-line no-unused-vars
 const GeoTag = require('../models/geotag');
@@ -25,11 +24,29 @@ const GeoTag = require('../models/geotag');
 /**
  * The module "geotag-store" exports a class GeoTagStore. 
  * It provides an in-memory store for geotag objects.
- * 
- * TODO: implement the module in the file "../models/geotag-store.js"
+ *
  */
 // eslint-disable-next-line no-unused-vars
 const GeoTagStore = require('../models/geotag-store');
+
+const GeoTagExamples = require('../models/geotag-examples');
+
+
+// =========================================================================
+// EIGENER CODE: Store initialisieren und mit Beispielen füllen
+// =========================================================================
+const store = new GeoTagStore();
+const examples = GeoTagExamples.tagList;
+
+// Deine geliebte, saubere for-Schleife
+for (let i = 0; i < examples.length; i++) {
+  let name = examples[i][0];
+  let lat = examples[i][1];
+  let lon = examples[i][2];
+  let hashtag = examples[i][3];
+  store.addGeoTag(new GeoTag(lat, lon, name, hashtag));
+}
+// =========================================================================
 
 /**
  * Route '/' for HTTP 'GET' requests.
@@ -61,7 +78,23 @@ router.get('/', (req, res) => {
  */
 
 // TODO: ... your code here ...
+router.post('/tagging', (req, res) => {
+  // 1. Daten aus dem Formular auslesen (Achtung: Formulardaten sind immer Strings, daher parseFloat)
+  const lat = parseFloat(req.body.latitude);
+  const lon = parseFloat(req.body.longitude);
+  const name = req.body.name;
+  const hashtag = req.body.hashtag;
 
+  // 2. Neues Objekt erstellen und im Store speichern
+  const newTag = new GeoTag(name, lat, lon, hashtag);
+  store.addGeoTag(newTag);
+
+  // 3. Umkreissuche um den neuen Tag (Wir nehmen mal einen großen Radius wie 1000, damit man was sieht)
+  const nearbyTags = store.getNearbyGeoTags(lat, lon, C);
+
+  // 4. EJS-Template mit der aktualisierten Liste rendern
+  res.render('index', { taglist: nearbyTags });
+});
 /**
  * Route '/discovery' for HTTP 'POST' requests.
  * (http://expressjs.com/de/4x/api.html#app.post.method)
@@ -79,5 +112,16 @@ router.get('/', (req, res) => {
  */
 
 // TODO: ... your code here ...
+router.post('/discovery', (req, res) => {
+  // 1. Daten aus dem Discovery-Formular auslesen (inklusive der versteckten Koordinaten!)
+  const lat = parseFloat(req.body.latitude);
+  const lon = parseFloat(req.body.longitude);
+  const searchterm = req.body.searchterm || ''; // Fallback auf leeren String, falls nichts eingegeben wurde
 
+  // 2. Im Store mit Suchbegriff und Koordinaten suchen
+  const searchResults = store.searchNearbyGeoTags(searchterm, lat, lon, 1000);
+
+  // 3. EJS-Template mit den Suchergebnissen rendern
+  res.render('index', { taglist: searchResults });
+});
 module.exports = router;

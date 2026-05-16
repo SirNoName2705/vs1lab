@@ -2,7 +2,7 @@
 
 /* eslint-disable no-unused-vars */
 
-// This script is executed when the browser loads index.html.
+// This script is executed when the browser loads index.html_bak.
 
 // "console.log" writes to the browser's console. 
 // The console window must be opened explicitly in the browser.

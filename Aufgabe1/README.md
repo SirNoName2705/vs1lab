@@ -70,9 +70,9 @@ Nun können sie in ihrem Arbeitszweig unabhängig vom Hauptzweig arbeiten. Ein T
 
 ```bash
 cd ~/git/vs1lab/Aufgabe1/gta_v1/public # in das Arbeitsverzeichnis wechseln
-code ./index.html # vscode Editor mit Webseite öffnen
-chromium ./index.html # Chromium Web Browser mit Webseite öffnen (Linux)
-open -a "Google Chrome" ./index.html # Chrome Web Browser mit Webseite öffnen (Mac)
+code ./index.html_bak # vscode Editor mit Webseite öffnen
+chromium ./index.html_bak # Chromium Web Browser mit Webseite öffnen (Linux)
+open -a "Google Chrome" ./index.html_bak # Chrome Web Browser mit Webseite öffnen (Mac)
 ```
 
 Wenn sie in den folgenden Aufgaben einen guten Zwischenstand erreicht haben oder fertig sind, sollten sie dies im Repository als sogenannten *Commit* festhalten, der lokal auf ihrem Rechner verwaltet wird (Beispiel für Linux/Mac):
@@ -131,9 +131,9 @@ Templates für Seite und Stylesheet liegen im Ordner `Aufgabe1` des Repositories
 
 ```bash
 cd ~/git/vs1lab/Aufgabe1/gta_v1/public # wechsle in das Arbeitsverzeichnis
-code ./index.html ./stylesheets/style.css # öffne Atom Editor im Wurzelverzeichnis der Aufgabe
-chromium ./index.html # öffne Chromium Web Browser mit Webseite (Linux)
-open -a "Google Chrome" ./index.html # öffne Chrome Web Browser mit Webseite (Mac)
+code ./index.html_bak ./stylesheets/style.css # öffne Atom Editor im Wurzelverzeichnis der Aufgabe
+chromium ./index.html_bak # öffne Chromium Web Browser mit Webseite (Linux)
+open -a "Google Chrome" ./index.html_bak # öffne Chrome Web Browser mit Webseite (Mac)
 ```
 
 ### B.2 Aufgabe (Responsive Grid Layout)
