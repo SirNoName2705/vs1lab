@@ -42,14 +42,15 @@ function updateLocation() {
     const latValue = document.getElementById('latitude').value;
     const lonValue = document.getElementById('longitude').value;
 
+    // 1. Daten-Brücke auslesen (Müssen wir nur einmal machen!)
+    const mapElement = document.getElementById('map');
+    const tagsJsonString = mapElement.getAttribute('data-tags');
+    const tagsList = tagsJsonString ? JSON.parse(tagsJsonString) : [];
+
     if (latValue && lonValue) {
         // Fall A: Server hat die Koordinaten schon geliefert! Kein GPS nötig.
         console.log("Koordinaten existieren bereits, lade Karte direkt.");
-
-        const mapManager = new MapManager();
-        mapManager.initMap(latValue, lonValue);
-        mapManager.updateMarkers(latValue, lonValue);
-
+        initAndUpdateMap(latValue, lonValue, tagsList);
     } else {
         // Fall B: Felder sind leer (erster Seitenaufruf). Wir müssen das GPS anfunken.
         console.log("Felder leer, starte GPS-Abfrage.");
@@ -58,21 +59,16 @@ function updateLocation() {
             const lat = helper.latitude;
             const lon = helper.longitude;
 
-            // Formularfelder ausfüllen
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lon;
             document.getElementById('hidden_latitude').value = lat;
             document.getElementById('hidden_longitude').value = lon;
 
-            // Karte laden
-            const mapManager = new MapManager();
-            mapManager.initMap(lat, lon);
-            mapManager.updateMarkers(lat, lon);
+            initAndUpdateMap(lat, lon, tagsList);
         });
     }
 }
 
-// 2. Deine innere Ruhe: Eine saubere Helper-Funktion gegen die Code-Duplizierung
 function initAndUpdateMap(lat, lon, tagsList) {
     const mapManager = new MapManager();
     mapManager.initMap(lat, lon);

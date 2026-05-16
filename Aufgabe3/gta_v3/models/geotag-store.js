@@ -23,6 +23,22 @@
  * - The proximity constrained is the same as for 'getNearbyGeoTags'.
  * - Keyword matching should include partial matches from name or hashtag fields. 
  */
+
+function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Erdradius in Kilometern
+    var dLat = (lat2 - lat1) * (Math.PI / 180);
+    var dLon = (lon2 - lon1) * (Math.PI / 180);
+    var lat1Rad = lat1 * (Math.PI / 180);
+    var lat2Rad = lat2 * (Math.PI / 180);
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distanz in Kilometern
+}
+
 class InMemoryGeoTagStore {
 
     // 1. Das private Array.
@@ -54,6 +70,7 @@ class InMemoryGeoTagStore {
         });
     }
 
+    //todo dearrow
     /**
      * Sucht GeoTags im Umkreis, die ein Keyword enthalten (Name oder Hashtag).
      */
@@ -78,15 +95,21 @@ class InMemoryGeoTagStore {
         });
     }
 
+
+    #calculateDistance(lat1, lon1, lat2, lon2) {
+        return calculateHaversineDistance(lat1, lon1, lat2, lon2);
+    }
+
     /**
      * Private Hilfsmethode zur Distanzberechnung (Euklidische Distanz).
      * Für ein Uni-Labor reicht in der Regel der Satz des Pythagoras auf den Koordinaten.
      */
-    #calculateDistance(lat1, lon1, lat2, lon2) {
+    #calculateEuklidianDistance(lat1, lon1, lat2, lon2) {
         const dLat = lat2 - lat1;
         const dLon = lon2 - lon1;
         return Math.sqrt(dLat * dLat + dLon * dLon);
     }
+
 }
 
 module.exports = InMemoryGeoTagStore;
