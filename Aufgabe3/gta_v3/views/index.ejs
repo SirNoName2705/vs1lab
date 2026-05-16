@@ -64,8 +64,8 @@
                 </ul>
             </div>
 
-            <div id="map" class="discovery__map col-7">
-                <img src="./images/mapview.jpg" alt="a map with locations" id="mapView" />
+            <div id="map" class="discovery__map col-7" data-tags="<%= JSON.stringify(taglist) %>">
+                <img src="./images/mapview.jpg" alt="a map with locations" id="mapView"  />
                 <span>Result map</span>
             </div>
         </div>
