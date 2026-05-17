@@ -1,0 +1,52 @@
+### 1. Suchen (Alle Tags abrufen)
+GET http://localhost:3000/api/geotags
+Accept: application/json
+
+### 2. Suchen (Nach Keyword filtern)
+GET http://localhost:3000/api/geotags?searchterm=Castle
+Accept: application/json
+
+### 3. Erstellen (Neuen Tag anlegen)
+# Achte darauf, dass hier noch KEINE ID mitgeschickt wird!
+POST http://localhost:3000/api/geotags
+Content-Type: application/json
+
+{
+  "name": "Mein Test-Ort",
+  "latitude": 49.02000,
+  "longitude": 8.40000,
+  "hashtag": "#test"
+}
+
+### 4. Auslesen (Den eben erstellten Tag abrufen - checke vorher welche ID er bekommen hat, z.B. 12)
+GET http://localhost:3000/api/geotags/12
+Accept: application/json
+
+### 5. Ändern (Den Tag mit ID 12 updaten)
+PUT http://localhost:3000/api/geotags/12
+Content-Type: application/json
+
+{
+  "name": "Mein geänderter Test-Ort",
+  "latitude": 49.02000,
+  "longitude": 8.40000,
+  "hashtag": "#geändert"
+}
+
+### 6. Löschen (Den Tag mit ID 12 vernichten)
+DELETE http://localhost:3000/api/geotags/12
+
+> {%
+    client.test("GeoTag wurde erfolgreich gelöscht", function() {
+        client.assert(response.status === 200, "Erwartet 200 OK beim Löschen");
+    });
+%}
+
+### 7. Prüfen, ob es wirklich weg ist
+GET http://localhost:3000/api/geotags/12
+
+> {%
+    client.test("GeoTag ist nicht mehr da", function() {
+        client.assert(response.status === 404, "Erwartet 404 Not Found, weil es gelöscht sein sollte");
+    });
+%}
