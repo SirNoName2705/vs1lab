@@ -330,3 +330,5 @@ $RECYCLE.BIN/
 /.idea/vslab.iml
 
 .gitignore
+
+*.bak
