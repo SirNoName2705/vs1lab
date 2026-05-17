@@ -75,7 +75,34 @@ function initAndUpdateMap(lat, lon, tagsList) {
     mapManager.updateMarkers(lat, lon, tagsList);
 }
 
-// Wait for the page to fully load its DOM content, then call updateLocation
-document.addEventListener("DOMContentLoaded", () => {
-    updateLocation()
-});
+
+// 1. Die sauberen, benannten Event-Handler
+function handleTaggingSubmit(event) {
+    event.preventDefault(); // Verhindert den echten HTTP-Submit und Page-Reload
+    console.log("Add Tag geklickt - Reload verhindert!");
+    // Hier bauen wir gleich den POST Fetch ein
+}
+
+function handleDiscoverySubmit(event) {
+    event.preventDefault(); // Verhindert den echten HTTP-Submit und Page-Reload
+    console.log("Search geklickt - Reload verhindert!");
+    // Hier bauen wir gleich den GET Fetch ein
+}
+
+// 2. Unsere Main-Funktion, die beim Start das DOM verdrahtet
+function initApp() {
+    updateLocation();
+
+    const taggingForm = document.getElementById('tag-form');
+    if (taggingForm) {
+        taggingForm.addEventListener('submit', handleTaggingSubmit);
+    }
+
+    const discoveryForm = document.getElementById('discoveryFilterForm');
+    if (discoveryForm) {
+        discoveryForm.addEventListener('submit', handleDiscoverySubmit);
+    }
+}
+
+// 3. Nur ein einziger, sauberer Aufruf am Ende
+document.addEventListener("DOMContentLoaded", initApp);
