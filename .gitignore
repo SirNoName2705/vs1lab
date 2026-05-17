@@ -319,3 +319,14 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,linux,windows,node,webstorm
+/.idea/.gitignore
+/.idea/jsLibraryMappings.xml
+/.idea/modules.xml
+/Aufgabe1/README_Aufgabe1.md
+/Aufgabe2/README_Aufgabe2.md
+/Aufgabe3/README_Aufgabe3.md
+/Aufgabe4/README_Aufgabe4.md
+/.idea/vcs.xml
+/.idea/vslab.iml
+
+.gitignore
