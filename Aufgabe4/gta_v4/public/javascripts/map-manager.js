@@ -44,10 +44,27 @@
     * @param {number} latitude The map center latitude
     * @param {number} longitude The map center longitude
     * @param {{latitude, longitude, name}[]} tags The map tags, defaults to just the current location
+     * @param {number} radiusInMeters The radius of the circle in meters, defaults to 1000 (1km)
     */
-    updateMarkers(latitude, longitude, tags = []) {
+    updateMarkers(latitude, longitude, tags = [], radiusInMeters=1000) {
         // delete all markers
         this.#markers.clearLayers();
+
+
+        // 2. Den roten Umkreis-Kreis um den aktuellen Standort zeichnen
+        L.circle([latitude, longitude], {
+            color: 'red',          // Linienfarbe
+            fillColor: '#f03',     // Füllfarbe
+            fillOpacity: 0.1,      // Wie durchsichtig (0.1 = sehr transparent)
+            radius: radiusInMeters // Radius in Metern
+        }).addTo(this.#markers);
+
+        // 3. Den "Your Location" Marker setzen
+        L.marker([latitude, longitude], { icon: this.#defaultIcon })
+            .bindPopup("Your Location")
+            .addTo(this.#markers);
+
+
         L.marker([latitude, longitude], { icon: this.#defaultIcon })
             .bindPopup("Your Location")
             .addTo(this.#markers);
@@ -55,6 +72,19 @@
             L.marker([tag.latitude,tag.longitude], { icon: this.#defaultIcon })
                 .bindPopup(tag.name)
                 .addTo(this.#markers);  
+        }
+    }
+
+    /**
+     * Erlaubt es, von außen auf Klicks in der Karte zu reagieren.
+     * @param {function} callback Eine Funktion, die lat und lon übergeben bekommt.
+     */
+    onMapClick(callback) {
+        if (this.#map) {
+            this.#map.on('click', (event) => {
+                // Leaflet speichert die Koordinaten im event.latlng Objekt
+                callback(event.latlng.lat, event.latlng.lng);
+            });
         }
     }
 }

@@ -9,89 +9,27 @@
 // Try to find this output in the browser...
 console.log("The geoTagging script is going to start...");
 
-// Here the API used for geolocations is selected
-// The following declaration is a 'mockup' that always works and returns a fixed position.
-var GEOLOCATION_API = {
-    getCurrentPosition: function(onsuccess) {
-        onsuccess({
-            "coords": {
-                "latitude": 49.013790,
-                "longitude": 8.390071,
-                "altitude": null,
-                "accuracy": 39,
-                "altitudeAccuracy": null,
-                "heading": null,
-                "speed": null
-            },
-            "timestamp": 1775140116396
-        });
-    }
-};
+//inits
 
-// This is the real API.
-// If there are problems with it, comment out the line.
-GEOLOCATION_API = navigator.geolocation;
-
-/**
- * TODO: 'updateLocation'
- * A function to retrieve the current location and update the page.
- * It is called once the page has been fully loaded.
- */
-function updateLocation() {
-    // 1. Schauen, ob schon Koordinaten vom Server im HTML stehen
-    const latValue = document.getElementById('latitude').value;
-    const lonValue = document.getElementById('longitude').value;
-
-    // 1. Daten-Brücke auslesen (Müssen wir nur einmal machen!)
-    const mapElement = document.getElementById('map');
-    const tagsJsonString = mapElement.getAttribute('data-tags');
-    const tagsList = tagsJsonString ? JSON.parse(tagsJsonString) : [];
-
-    if (latValue && lonValue) {
-        // Fall A: Server hat die Koordinaten schon geliefert! Kein GPS nötig.
-        console.log("Koordinaten existieren bereits, lade Karte direkt.");
-        initAndUpdateMap(latValue, lonValue, tagsList);
-    } else {
-        // Fall B: Felder sind leer (erster Seitenaufruf). Wir müssen das GPS anfunken.
-        console.log("Felder leer, starte GPS-Abfrage.");
-
-        LocationHelper.findLocation((helper) => {
-            const lat = helper.latitude;
-            const lon = helper.longitude;
-
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lon;
-            document.getElementById('hidden_latitude').value = lat;
-            document.getElementById('hidden_longitude').value = lon;
-
-            initAndUpdateMap(lat, lon, tagsList);
-        });
-    }
-}
+let globalMapManager = null; // static ressource
 
 function initAndUpdateMap(lat, lon, tagsList) {
-    const mapManager = new MapManager();
-    mapManager.initMap(lat, lon);
-    mapManager.updateMarkers(lat, lon, tagsList);
+    if (!globalMapManager) {
+        globalMapManager = new MapManager();
+        globalMapManager.initMap(lat, lon);
+
+        globalMapManager.onMapClick(handleMapClick);
+    }
+    globalMapManager.updateMarkers(lat, lon, tagsList);
 }
 
-
-// 1. Die sauberen, benannten Event-Handler
-function handleTaggingSubmit(event) {
-    event.preventDefault(); // Verhindert den echten HTTP-Submit und Page-Reload
-    console.log("Add Tag geklickt - Reload verhindert!");
-    // Hier bauen wir gleich den POST Fetch ein
-}
-
-function handleDiscoverySubmit(event) {
-    event.preventDefault(); // Verhindert den echten HTTP-Submit und Page-Reload
-    console.log("Search geklickt - Reload verhindert!");
-    // Hier bauen wir gleich den GET Fetch ein
-}
-
-// 2. Unsere Main-Funktion, die beim Start das DOM verdrahtet
 function initApp() {
     updateLocation();
+
+    const devToggle = document.getElementById('dev-mode-toggle');
+    if (devToggle) {
+        devToggle.addEventListener('change', handleDevModeToggle);
+    }
 
     const taggingForm = document.getElementById('tag-form');
     if (taggingForm) {
@@ -104,5 +42,203 @@ function initApp() {
     }
 }
 
-// 3. Nur ein einziger, sauberer Aufruf am Ende
+/**
+ * Holt hart die echten GPS-Koordinaten, füllt die Felder und triggert eine Suche.
+ * Perfekt für den Start ODER wenn der Dev-Mode ausgeschaltet wird!
+ */
+function getCurrentLocation() {
+    console.log("Hole echten GPS-Standort...");
+
+    LocationHelper.findLocation((helper) => {
+        const lat = helper.latitude;
+        const lon = helper.longitude;
+
+        // Formulare befüllen
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lon;
+
+        if (document.getElementById('hidden_latitude')) {
+            document.getElementById('hidden_latitude').value = lat;
+            document.getElementById('hidden_longitude').value = lon;
+        }
+
+        console.log("Echter Standort wiederhergestellt. Lade Daten vom Server...");
+        handleDiscoverySubmit(new Event('submit'));
+    });
+}
+
+//Updaters
+
+
+/**
+ * A function to retrieve the current location and update the page.
+ * It is called once the page has been fully loaded.
+ */
+function updateLocation() {
+    const latValue = document.getElementById('latitude').value;
+    const lonValue = document.getElementById('longitude').value;
+
+    if (latValue && lonValue) {
+        console.log("Koordinaten existieren bereits im Formular. Triggere initialen Fetch...");
+        // Wir haben schon Koordinaten -> Einfach die AJAX-Suche auslösen!
+        handleDiscoverySubmit(new Event('submit'));
+    } else {
+        getCurrentLocation();
+    }
+}
+
+/**
+ * Nimmt ein Array von GeoTag-Objekten und zeichnet die HTML-Liste sowie die Karte neu.
+ */
+function updateDisplay(tagsArray) {
+    // 1. Die HTML-Liste finden und komplett leeren (Reset)
+    const resultList = document.getElementById('discoveryResults');
+    resultList.innerHTML = '';
+
+    // 2. Für jeden GeoTag im Array ein neues <li> Element bauen
+    tagsArray.forEach(function(tag) {
+        const li = document.createElement('li');
+        // Wir bauen den Text genau so zusammen, wie er vorher im EJS-Template aussah
+        li.textContent = `${tag.name} ( ${tag.latitude},${tag.longitude}) ${tag.hashtag}`;
+        resultList.appendChild(li); // Element in die Liste hängen
+    });
+
+    // 3. Die Karte aktualisieren
+    // Wir holen uns die aktuellen Koordinaten des Nutzers aus den Such-Feldern
+    const lat = document.getElementById('hidden_latitude').value || document.getElementById('latitude').value;
+    const lon = document.getElementById('hidden_longitude').value || document.getElementById('longitude').value;
+
+    initAndUpdateMap(lat, lon, tagsArray);
+}
+
+//Handlers
+
+function handleTaggingSubmit(event) {
+    event.preventDefault();
+
+    // 1. Daten auslesen
+    const lat = document.getElementById('latitude').value;
+    const lon = document.getElementById('longitude').value;
+    const name = document.getElementById('name').value;
+    const hashtag = document.getElementById('hashtag').value;
+
+    // 2. Das Payload-Dictionary bauen
+    const payload = {
+        latitude: lat,
+        longitude: lon,
+        name: name,
+        hashtag: hashtag
+    };
+
+    // 3. Den AJAX POST-Request abfeuern
+    fetch('/api/geotags', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json' // WICHTIG: Sagt dem Server, dass JSON kommt!
+        },
+        body: JSON.stringify(payload)
+    })
+        .then(function(response) {
+            // HTTP-Status checken
+            if (response.status === 201) {
+                return response.json(); // Parse die Server-Antwort als JSON
+            } else {
+                throw new Error("Server hat Fehler gemeldet: " + response.status);
+            }
+        })
+        .then(function(neuerTagVomServer) {
+            console.log("Erfolgreich vom Server gespeichert:", neuerTagVomServer);
+            handleDiscoverySubmit(new Event('submit'));
+        })
+        .catch(function(error) {
+            console.error("Netzwerkfehler beim POST:", error);
+        });
+}
+
+function handleDiscoverySubmit(event) {
+    event.preventDefault(); // Verhindert den Seiten-Reload
+
+    // 1. Suchbegriff und Koordinaten aus dem Formular auslesen
+    const searchterm = document.getElementById('searchterm').value;
+    const lat = document.getElementById('hidden_latitude').value;
+    const lon = document.getElementById('hidden_longitude').value;
+
+    // 2. Die URL für unseren GET-Request zusammenbasteln
+    // Das ? markiert den Beginn der Parameter, das & trennt sie.
+    const url = `/api/geotags?searchterm=${searchterm}&latitude=${lat}&longitude=${lon}`;
+
+    console.log("Sende GET Request an:", url);
+
+    // 3. Den AJAX GET-Request abfeuern
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json' // Wir wollen JSON als Antwort, kein HTML
+        }
+    })
+        .then(function(response) {
+            if (response.ok) {
+                return response.json(); // Server-Antwort in ein JS-Array verwandeln
+            } else {
+                throw new Error("Server Fehler: " + response.status);
+            }
+        })
+        .then(function(gefundeneTags) {
+            console.log("Suchergebnisse empfangen:", gefundeneTags);
+
+            // 4. BINGO! Wir geben die Daten an unsere Maler-Funktion,
+            // damit sie auf dem Bildschirm erscheinen!
+            updateDisplay(gefundeneTags);
+        })
+        .catch(function(error) {
+            console.error("Netzwerkfehler beim GET:", error);
+        });
+}
+
+// Devmode sachen
+
+function handleMapClick(clickedLat, clickedLon) {
+    const devToggle = document.getElementById('dev-mode-toggle');
+
+    // Nur reagieren, wenn der Dev-Mode an ist!
+    if (devToggle && devToggle.checked) {
+        const latStr = clickedLat.toFixed(5);
+        const lonStr = clickedLon.toFixed(5);
+
+        console.log(`Karte geklickt! Setze Koordinaten auf: ${latStr}, ${lonStr}`);
+
+        // Formularfelder befüllen
+        document.getElementById('latitude').value = latStr;
+        document.getElementById('longitude').value = lonStr;
+
+        if (document.getElementById('hidden_latitude')) {
+            document.getElementById('hidden_latitude').value = latStr;
+            document.getElementById('hidden_longitude').value = lonStr;
+        }
+        console.log("Triggere automatische Suche für neuen Standort...");
+        handleDiscoverySubmit(new Event('submit'));
+    }
+}
+
+function handleDevModeToggle(event) {
+    const isDev = event.target.checked;
+
+    document.getElementById('latitude').readOnly = !isDev;
+    document.getElementById('longitude').readOnly = !isDev;
+
+    // Für die Suche auch entsperren (falls du die Felder im Discovery-Formular hast)
+    if (document.getElementById('hidden_latitude')) {
+        document.getElementById('hidden_latitude').readOnly = !isDev;
+        document.getElementById('hidden_longitude').readOnly = !isDev;
+    }
+
+    console.log("Dev Mode ist jetzt:", isDev ? "AN (Klick auf die Karte!)" : "AUS");
+
+    if (!isDev) {
+        console.log("Setze auf echten Standort zurück...");
+        getCurrentLocation();
+    }
+}
+
+
 document.addEventListener("DOMContentLoaded", initApp);

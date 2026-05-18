@@ -12,7 +12,7 @@
 
 const express = require('express');
 const router = express.Router();
-
+const searchRadius = 1; //1 Kilometer, passend zur Haversine-Berechnung!
 /**
  * The module "geotag" exports a class GeoTagStore.
  * It represents geotags.
@@ -74,7 +74,7 @@ router.get('/api/geotags', (req, res) => {
     const lon = parseFloat(req.query.longitude);
 
     // Optional: Falls der Client einen eigenen Radius mitschickt, nehmen wir den, sonst Default 1000
-    const radius = parseFloat(req.query.radius) || 1000;
+    const radius = parseFloat(req.query.radius) || searchRadius;
 
     console.log(`API GET: Filter nach Umkreis (${lat}, ${lon}) und Keyword: "${searchterm}"`);
     const localResults = store.searchNearbyGeoTags(searchterm, lat, lon, radius);
