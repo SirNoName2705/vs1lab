@@ -158,13 +158,11 @@ function handleTaggingSubmit(event) {
 function handleDiscoverySubmit(event) {
     event.preventDefault(); // Verhindert den Seiten-Reload
 
-    // 1. Suchbegriff und Koordinaten aus dem Formular auslesen
     const searchterm = document.getElementById('searchterm').value;
     const lat = document.getElementById('hidden_latitude').value;
     const lon = document.getElementById('hidden_longitude').value;
 
-    // 2. Die URL für unseren GET-Request zusammenbasteln
-    // Das ? markiert den Beginn der Parameter, das & trennt sie.
+
     const url = `/api/geotags?searchterm=${searchterm}&latitude=${lat}&longitude=${lon}`;
 
     console.log("Sende GET Request an:", url);
@@ -186,8 +184,6 @@ function handleDiscoverySubmit(event) {
         .then(function(gefundeneTags) {
             console.log("Suchergebnisse empfangen:", gefundeneTags);
 
-            // 4. BINGO! Wir geben die Daten an unsere Maler-Funktion,
-            // damit sie auf dem Bildschirm erscheinen!
             updateDisplay(gefundeneTags);
         })
         .catch(function(error) {

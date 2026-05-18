@@ -111,7 +111,7 @@ router.post('/api/geotags', (req, res) => {
  */
 router.get('/api/geotags/:id', (req, res) => {
   const id = req.params.id;
-  const tag = store.getGeoTagById(id); // TODO: Muss in geotag-store.js angelegt werden
+  const tag = store.getGeoTagById(id);
 
   if (!tag) {
     return res.status(404).json({ error: "GeoTag not found" });
@@ -135,7 +135,7 @@ router.put('/api/geotags/:id', (req, res) => {
       id // Die ID muss erhalten bleiben!
   );
 
-  const result = store.updateGeoTag(id, updatedTagData); // TODO: Muss in geotag-store.js angelegt werden
+  const result = store.updateGeoTag(id, updatedTagData);
 
   if (!result) {
     return res.status(404).json({ error: "GeoTag not found" });
@@ -151,8 +151,7 @@ router.put('/api/geotags/:id', (req, res) => {
 router.delete('/api/geotags/:id', (req, res) => {
   const id = req.params.id;
 
-  const deletedTag = store.removeGeoTag(id); // ACHTUNG: removeGeoTag sucht aktuell noch nach 'name', muss auf 'id' umgebaut werden!
-
+  const deletedTag = store.removeGeoTag(id);
   if (!deletedTag) {
     return res.status(404).json({ error: "GeoTag not found" });
   }
