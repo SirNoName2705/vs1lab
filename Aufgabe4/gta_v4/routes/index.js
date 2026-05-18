@@ -61,31 +61,80 @@ router.get('/', (req, res) => {
 
 // API routes (A4)
 
+// /**
+//  * Route '/api/geotags' for HTTP 'GET' requests.
+//  * As a response, an array with Geo Tag objects is rendered as JSON.
+//  */
+// router.get('/api/geotags', (req, res) => {
+//   const searchterm = req.query.searchterm || '';
+//
+//   // Fall 1: Location-Parameter sind vorhanden -> Volle Filterung (Umkreis + Keyword)
+//   if (req.query.latitude && req.query.longitude) {
+//     const lat = parseFloat(req.query.latitude);
+//     const lon = parseFloat(req.query.longitude);
+//
+//     // Optional: Falls der Client einen eigenen Radius mitschickt, nehmen wir den, sonst Default 1000
+//     const radius = parseFloat(req.query.radius) || searchRadius;
+//
+//     console.log(`API GET: Filter nach Umkreis (${lat}, ${lon}) und Keyword: "${searchterm}"`);
+//     const localResults = store.searchNearbyGeoTags(searchterm, lat, lon, radius);
+//     return res.status(200).json(localResults);
+//   }
+//
+//   // Fall 2: Keine Location vorhanden -> Filtere NUR nach Keyword über alle Instanzen
+//   console.log(`API GET: Filter nur nach Keyword über alle Tags: "${searchterm}"`);
+//   const globalResults = store.searchGeoTagsByKeyword(searchterm);
+//   res.status(200).json(globalResults);
+// });
+
+
+
 /**
  * Route '/api/geotags' for HTTP 'GET' requests.
- * As a response, an array with Geo Tag objects is rendered as JSON.
+ * Unterstützt Filterung (Keyword + Location) UND Paging.
  */
 router.get('/api/geotags', (req, res) => {
   const searchterm = req.query.searchterm || '';
+  let filteredTags = [];
 
-  // Fall 1: Location-Parameter sind vorhanden -> Volle Filterung (Umkreis + Keyword)
+  // 1. Filtern (bleibt unverändert)
   if (req.query.latitude && req.query.longitude) {
     const lat = parseFloat(req.query.latitude);
     const lon = parseFloat(req.query.longitude);
-
-    // Optional: Falls der Client einen eigenen Radius mitschickt, nehmen wir den, sonst Default 1000
     const radius = parseFloat(req.query.radius) || searchRadius;
-
-    console.log(`API GET: Filter nach Umkreis (${lat}, ${lon}) und Keyword: "${searchterm}"`);
-    const localResults = store.searchNearbyGeoTags(searchterm, lat, lon, radius);
-    return res.status(200).json(localResults);
+    filteredTags = store.searchNearbyGeoTags(searchterm, lat, lon, radius);
+  } else {
+    filteredTags = store.searchGeoTagsByKeyword(searchterm);
   }
 
-  // Fall 2: Keine Location vorhanden -> Filtere NUR nach Keyword über alle Instanzen
-  console.log(`API GET: Filter nur nach Keyword über alle Tags: "${searchterm}"`);
-  const globalResults = store.searchGeoTagsByKeyword(searchterm);
-  res.status(200).json(globalResults);
+  // 2. Paging Mathematik (Die "Konstante" ist hier hardcodiert auf 5)
+  const ITEMS_PER_PAGE = 5;
+  const totalItems = filteredTags.length;
+
+  // Aktuelle Seite aus der URL lesen, Fallback ist Seite 1
+  const currentPage = parseInt(req.query.page, 10) || 1;
+
+  // Gesamtseiten berechnen (aufrunden)
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+
+  // Array-Indizes berechnen
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Portion für die aktuelle Seite herausschneiden
+  const pagedTags = filteredTags.slice(startIndex, endIndex);
+
+  // 3. Als sauberes JSON-Objekt zurückgeben
+  res.status(200).json({
+    paging: {
+      currentPage: currentPage,
+      totalPages: totalPages
+    },
+    tags: pagedTags
+  });
 });
+
+
 
 /**
  * Route '/api/geotags' for HTTP 'POST' requests.

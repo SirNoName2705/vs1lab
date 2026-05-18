@@ -10,6 +10,11 @@
 console.log("The geoTagging script is going to start...");
 
 //inits
+// Globale Variable, um uns die aktuelle Seite für die Buttons zu merken
+let currentPagingState = {
+    currentPage: 1,
+    totalPages: 1
+};
 
 let globalMapManager = null; // static ressource
 
@@ -25,6 +30,13 @@ function initAndUpdateMap(lat, lon, tagsList) {
 
 function initApp() {
     updateLocation();
+
+    // NEU: Button-Listener für Paging
+    const btnPrev = document.getElementById('btn-prev-page');
+    if (btnPrev) btnPrev.addEventListener('click', () => goToPage(currentPagingState.currentPage -1));
+
+    const btnNext = document.getElementById('btn-next-page');
+    if (btnNext) btnNext.addEventListener('click', () => goToPage(currentPagingState.currentPage+1 ));
 
     const devToggle = document.getElementById('dev-mode-toggle');
     if (devToggle) {
@@ -183,17 +195,74 @@ function handleDiscoverySubmit(event) {
                 throw new Error("Server Fehler: " + response.status);
             }
         })
-        .then(function(gefundeneTags) {
-            console.log("Suchergebnisse empfangen:", gefundeneTags);
-
-            // 4. BINGO! Wir geben die Daten an unsere Maler-Funktion,
-            // damit sie auf dem Bildschirm erscheinen!
-            updateDisplay(gefundeneTags);
+        .then(function(serverResponse) {
+            console.log("Suchergebnisse empfangen:", serverResponse);
+            updateDisplay(serverResponse.tags);
+            updatePagingUI(serverResponse.paging);
         })
         .catch(function(error) {
             console.error("Netzwerkfehler beim GET:", error);
         });
 }
+
+//paging
+
+
+
+/**
+ * Aktualisiert die Anzeige und den Status der Vor/Zurück-Buttons
+ */
+function updatePagingUI(pagingData) {
+    currentPagingState = pagingData;
+
+    const controlsDiv = document.getElementById('paging-controls');
+    const infoSpan = document.getElementById('paging-info');
+    const btnPrev = document.getElementById('btn-prev-page');
+    const btnNext = document.getElementById('btn-next-page');
+
+    if (!controlsDiv || !infoSpan) return;
+
+    // Buttons einblenden
+    controlsDiv.style.display = 'flex';
+
+    // Text aktualisieren
+    infoSpan.textContent = `Seite ${currentPagingState.currentPage} von ${currentPagingState.totalPages}`;
+
+    // Buttons (de-)aktivieren gemäß den Regeln des Profs!
+    btnPrev.disabled = currentPagingState.currentPage <= 1;
+    btnNext.disabled = currentPagingState.currentPage >= currentPagingState.totalPages;
+}
+
+/**
+ * Hilfsfunktion: Feuert eine neue Suche mit der angeforderten Seite ab
+ */
+function goToPage(targetPage) {
+    // Verhindere out-of-bounds Klicks (Sicherheitsschicht!)
+    if (targetPage < 1 || targetPage > currentPagingState.totalPages) return;
+
+    // Suchbegriff und Koordinaten aus dem Formular holen (wie bei normaler Suche)
+    const searchterm = document.getElementById('searchterm').value;
+    const lat = document.getElementById('hidden_latitude').value;
+    const lon = document.getElementById('hidden_longitude').value;
+
+    // URL MIT PAGING-PARAMETER BASTELN!
+    const url = `/api/geotags?searchterm=${searchterm}&latitude=${lat}&longitude=${lon}&page=${targetPage}`;
+
+    // AJAX Call (Genau wie in handleDiscoverySubmit)
+    fetch(url, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+    })
+        .then(response => response.json())
+        .then(serverResponse => {
+            updateDisplay(serverResponse.tags);
+            updatePagingUI(serverResponse.paging);
+        })
+        .catch(error => console.error("Paging Error:", error));
+}
+
+
+
 
 // Devmode sachen
 

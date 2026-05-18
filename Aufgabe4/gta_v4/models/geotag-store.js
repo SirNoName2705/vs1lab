@@ -110,10 +110,6 @@ class InMemoryGeoTagStore {
         });
     }
 
-    //todo dearrow
-    /**
-     * Sucht GeoTags im Umkreis, die ein Keyword enthalten (Name oder Hashtag).
-     */
     searchNearbyGeoTags(keyword, latitude, longitude, radius) {
         // Zuerst alle Tags im Umkreis holen (Code-Wiederverwendung!)
         const nearbyTags = this.getNearbyGeoTags(latitude, longitude, radius);

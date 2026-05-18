@@ -65,6 +65,12 @@
                         <li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
                     <% }); %>
                 </ul>
+
+                <div id="paging-controls" style="margin-top: 15px; display: none; align-items: center; gap: 10px;">
+                    <button id="btn-prev-page" type="button" disabled>Zurück</button>
+                    <span id="paging-info" style="font-weight: bold;">Seite 1 von ?</span>
+                    <button id="btn-next-page" type="button">Vor</button>
+                </div>
             </div>
 
             <div id="map" class="discovery__map col-7" data-tags="<%= JSON.stringify(taglist) %>">
